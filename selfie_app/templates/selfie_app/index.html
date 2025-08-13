@@ -1,0 +1,428 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selfie Magic | Background Changer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --secondary: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --white: #ffffff;
+            --gray: #636e72;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .app-header {
+            padding: 2.5rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .app-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .app-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .app-content {
+            padding: 2rem;
+        }
+        
+        .camera-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        video, canvas {
+            width: 100%;
+            display: block;
+            background: var(--dark);
+        }
+        
+        canvas {
+            display: none;
+        }
+        
+        .camera-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid #dfe6e9;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e4e8;
+        }
+        
+        .background-selection {
+            margin: 2.5rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 1.8rem;
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .background-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+        }
+        
+        .background-option {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .background-option:hover {
+            transform: translateY(-5px);
+        }
+        
+        .background-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .background-option label {
+            display: block;
+            cursor: pointer;
+        }
+        
+        .background-thumbnail {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .background-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .background-option:hover .background-thumbnail img {
+            transform: scale(1.1);
+        }
+        
+        .background-option input[type="radio"]:checked + label .background-thumbnail {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        }
+        
+        .background-name {
+            display: block;
+            text-align: center;
+            margin-top: 0.7rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        .action-section {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        #uploadForm {
+            margin: 0 auto;
+            max-width: 320px;
+        }
+        
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            padding: 1.1rem;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 20px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn-action:hover {
+            background: var(--primary-light);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.5);
+        }
+        
+        .btn-action:disabled {
+            background: #b2bec3;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 1.5rem;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(108, 92, 231, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
+            .app-header {
+                padding: 1.8rem 1.5rem;
+            }
+            
+            .app-content {
+                padding: 1.5rem;
+            }
+            
+            .background-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .btn {
+                padding: 0.7rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-camera-retro"></i> Selfie Magic</h1>
+            <p>Transform your selfies with Indian flag backgrounds</p>
+        </header>
+
+        <div class="app-content">
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="video" width="640" height="360" autoplay playsinline></video>
+                    <canvas id="canvas" width="640" height="360"></canvas>
+                </div>
+                
+                <div class="camera-controls">
+                    <button id="snap" class="btn btn-primary">
+                        <i class="fas fa-camera"></i> Take Photo
+                    </button>
+                    <button id="retake" class="btn btn-secondary" style="display:none;">
+                        <i class="fas fa-redo"></i> Retake
+                    </button>
+                </div>
+            </div>
+
+            <div class="background-selection">
+                <h3 class="section-title"><i class="fas fa-image"></i> Choose Your flag style</h3>
+                <div class="background-options">
+                    {% for bg in backgrounds %}
+                    <div class="background-option">
+                        <input type="radio" name="background" id="bg{{ forloop.counter }}" 
+                               value="{{ bg.file }}" {% if forloop.first %}checked{% endif %}>
+                        <label for="bg{{ forloop.counter }}">
+                            <div class="background-thumbnail">
+                                <img src="{% static 'selfie_app/background/'|add:bg.file %}" alt="{{ bg.name }}">
+                            </div>
+                            <span class="background-name">{{ bg.name }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="action-section">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="image" id="imageInput">
+                    <input type="hidden" name="background" id="backgroundInput" value="{{ backgrounds.0.file }}">
+                    <button type="submit" class="btn btn-action" id="uploadBtn" disabled>
+                        <i class="fas fa-magic"></i> Apply Background
+                    </button>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Creating your masterpiece...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Camera Setup
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const snap = document.getElementById('snap');
+        const retake = document.getElementById('retake');
+        const imageInput = document.getElementById('imageInput');
+        const backgroundInput = document.getElementById('backgroundInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        let stream = null;
+
+        // Initialize Camera
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        aspectRatio: 16/9,
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Camera Error:", err);
+                alert("Could not access camera. Please enable permissions and reload.");
+            }
+        }
+
+        // Background Selection Handler
+        document.querySelectorAll('input[name="background"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                backgroundInput.value = radio.value;
+            });
+        });
+
+        // Take Photo Button
+        snap.addEventListener('click', () => {
+            context.drawImage(video, 0, 0, 640, 360);
+            const dataURL = canvas.toDataURL('image/png');
+            imageInput.value = dataURL;
+            
+            // UI Updates
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+            snap.style.display = 'none';
+            retake.style.display = 'inline-block';
+            uploadBtn.disabled = false;
+        });
+
+        // Retake Photo Button
+        retake.addEventListener('click', () => {
+            video.style.display = 'block';
+            canvas.style.display = 'none';
+            snap.style.display = 'inline-block';
+            retake.style.display = 'none';
+            uploadBtn.disabled = true;
+        });
+
+        // Form Submission Handler
+        uploadForm.addEventListener('submit', () => {
+            loading.style.display = 'block';
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        });
+
+        // Clean up camera on page exit
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Initialize
+        startCamera();
+    </script>
+</body>
+</html>
